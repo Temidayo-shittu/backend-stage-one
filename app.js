@@ -1,31 +1,34 @@
 require('dotenv').config()
-require('express-async-errors')
-const express= require('express')
-const app= express()
-//Database
-const connectDB=  require('./db/connect')
-const backendRouter= require('./routes/backendRoute')
-//Middleware
-const notFoundMiddleware= require('./middleware/not-found')
-const errorHandlerMiddleware= require('./middleware/error-handler')
+const express= require('express');
+const app= express();
 
 app.use(express.json())
 
-app.use('/',(req,res)=>{
-    res.send('HNG BACKEND STAGE 1')
+
+app.use('/api',(req,res)=>{
+    const { slack_name, track} = req.query;
+    const date = new Date();
+    const daysOfWeek = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+    const current_day = daysOfWeek[date.getDay()];
+    const utc_time = date.toISOString().slice(0,-5) + 'Z';
+
+    res.status(200).json({
+        slack_name,
+        current_day,
+        utc_time,
+        track,
+        github_file_url: 'https://github.com/Temidayo-shittu/backend-stage-one/blob/master/app.js',
+        github_repo_url: 'https://github.com/Temidayo-shittu/backend-stage-one',
+        status_code: 200,
+
+    })
 })
-
-app.use(backendRouter);
-//app.use(notFoundMiddleware)
-//app.use(errorHandlerMiddleware)
-
 
 
 const port= process.env.PORT || 5000
 
 const start= async()=>{
     try {
-        await connectDB(process.env.MONGO_URL)
         app.listen(port, console.log(`Listening on port ${port}`))
     } catch (error) {
         console.log(error)
